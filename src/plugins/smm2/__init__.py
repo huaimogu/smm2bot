@@ -1,4 +1,5 @@
 from nonebot import on_command
+from nonebot.permission import SUPERUSER
 from nonebot.adapters.onebot.v11 import (
     Message,
     MessageEvent, Bot,
@@ -40,10 +41,10 @@ record_matcher = on_command('record')
 view_matcher = on_command('view')
 bind_matcher = on_command('bind')
 default_matcher = on_command('default')
-block_marher = on_command('大师')
-unblock_marher = on_command('不是大师')
-white_marher = on_command('笨比')
-unwhite_marher = on_command('不是笨比')
+block_marher = on_command('大师', permission=SUPERUSER)
+unblock_marher = on_command('不是大师', permission=SUPERUSER)
+white_marher = on_command('笨比', permission=SUPERUSER)
+unwhite_marher = on_command('不是笨比', permission=SUPERUSER)
 help_matcher = on_command('help')
 
 
@@ -51,36 +52,32 @@ help_matcher = on_command('help')
 async def _(event: MessageEvent):
     qid = event.get_user_id()
     ater = get_message_ater(event.raw_message)
-    if qid == '1145737342':
-        block_user(smmdb, ater)
-        await block_marher.send('大师好！')
+    block_user(smmdb, ater)
+    await block_marher.send('大师好!')
 
 
 @unblock_marher.handle()
 async def _(event: MessageEvent):
     qid = event.get_user_id()
     ater = get_message_ater(event.raw_message)
-    if qid == '1145737342':
-        unblock_user(smmdb, ater)
-        await unblock_marher.send('发生什么事了')
+    unblock_user(smmdb, ater)
+    await unblock_marher.send('发生什么事了?')
 
 
 @white_marher.handle()
 async def _(event: MessageEvent):
     qid = event.get_user_id()
     ater = get_message_ater(event.raw_message)
-    if qid == '1145737342':
-        white_user(smmdb, ater)
-        await block_marher.send('笨比好！')
+    white_user(smmdb, ater)
+    await block_marher.send('笨比好!')
 
 
 @unwhite_marher.handle()
 async def _(event: MessageEvent):
     qid = event.get_user_id()
     ater = get_message_ater(event.raw_message)
-    if qid == '1145737342':
-        unwhite_user(smmdb, ater)
-        await unblock_marher.send('发生什么事了')
+    unwhite_user(smmdb, ater)
+    await unblock_marher.send('发生什么事了?')
 
 
 @sw_matcher.handle()
