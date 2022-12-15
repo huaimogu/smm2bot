@@ -2,20 +2,29 @@ import requests
 from PIL import Image, ImageDraw, ImageFont
 from .downfile import down_file
 from .utils import draw_text_center_withlines
+from .utils import transid
 
 
 def get_course_detail(cid, filter_type, proxies):
     url1 = 'https://tgrcode.com/mm2/level_info/{0}'.format(cid)
     url2 = 'https://tgrcode.com/mm2/level_played/{0}'.format(cid)
     try:
-        r1 = requests.get(url1, proxies=proxies, timeout=500)
-        if r1.status_code != 200:
-            return r1.json()['error']
-        response1 = r1.json()
-        r2 = requests.get(url2, proxies=proxies, timeout=500)
-        if r2.status_code != 200:
-            return r2.json()['error']
-        response2 = r2.json()
+        rq = requests.get('{0}/{1}'.format(url1, cid), proxies=proxies)
+        i = 0
+        while i < 1 and (rq.status_code != 200 or rq.text == ''):
+            rq = requests.get(url1, proxies=proxies)
+            i = i + 1
+        if rq.status_code != 200:
+            return rq.text
+        response1 = rq.json()
+        rq = requests.get('{0}/{1}'.format(url2, cid), proxies=proxies)
+        i = 0
+        while i < 1 and (rq.status_code != 200 or rq.text == ''):
+            rq = requests.get(url2, proxies=proxies)
+            i = i + 1
+        if rq.status_code != 200:
+            return rq.text
+        response2 = rq.json()
         h = 112
         w = 581
         players = []
@@ -39,6 +48,7 @@ def get_course_detail(cid, filter_type, proxies):
         img.paste(bg_img, (0, 0, 1793, 1047))
         font = ImageFont.truetype('pic/yaheibold.ttf', size=25)
         font2 = ImageFont.truetype('pic/yaheibold.ttf', size=40)
+        font3 = ImageFont.truetype('pic/yaheibold.ttf', size=15)
         font_color = (75, 19, 22)
         draw = ImageDraw.Draw(img)
         down_file('https://tgrcode.com/mm2/level_thumbnail/{0}'.format(cid),
@@ -59,6 +69,7 @@ def get_course_detail(cid, filter_type, proxies):
                 Image.ANTIALIAS)
             r, g, b, a = first_img.split()
             img.paste(first_img, (90, 900, 160, 970), mask=a)
+            draw.text(xy=(190, 935), text=transid(response1['first_completer']['code']), fill=font_color, font=font)
         if 'record_holder' in response1.keys():
             down_file(response1['record_holder']['mii_image'],
                       'pic/info/{0}-mii.png'.format(response1['record_holder']['code']),
@@ -67,17 +78,17 @@ def get_course_detail(cid, filter_type, proxies):
                 (70, 70), Image.ANTIALIAS)
             r, g, b, a = record_img.split()
             img.paste(record_img, (575, 900, 645, 970), mask=a)
+            draw.text(xy=(680, 935), text=transid(response1['record_holder']['code']), fill=font_color, font=font)
         draw.text(xy=(190, 890),
-                  text=response1['first_completer']['name'] if 'first_completer' in response1.keys() else '--',
-                  fill=font_color, font=font)
-        draw.text(xy=(680, 890), text='{0}'.format(
-            response1['record_holder']['name']) if 'record_holder' in response1.keys() else '--', fill=font_color,
-                  font=font)
+            text=response1['first_completer']['name'] if 'first_completer' in response1.keys() else '--',
+            fill=font_color, font=font)
+        draw.text(xy=(680, 890), text=
+            response1['record_holder']['name'] if 'record_holder' in response1.keys() else '--', fill=font_color,
+            font=font)
         draw.text(xy=(115, 25), text=response1['name'], fill=font_color, font=font2)
         draw.text(xy=(680, 150), text=response1['uploader']['name'], fill=font_color, font=font)
+        draw.text(xy=(680, 205), text=transid(response1['uploader']['code']), fill=font_color, font=font)
         difficulty = response1['difficulty']
-        # if response1['uploader']['code'] == '1V2K24M8G':
-        #     difficulty = 1
         if difficulty == 0:
             difficulty_name = '简单'
         if difficulty == 1:
@@ -107,6 +118,7 @@ def get_course_detail(cid, filter_type, proxies):
             player_img = Image.open('pic/detail-persionbg.png')
             img.paste(player_img, (1140, 320 + index * h - 3, 1140 + 581, (index + 1) * h + 320 - 3))
             draw.text(xy=(1300, index * h + 338), text=player['name'], fill=font_color, font=font)
+            draw.text(xy=(1300, index * h + 375), text=transid(player['code']), fill=(211, 211, 211), font=font3)
             if player['pid'] in response2['cleared']:
                 clear_img = Image.open('pic/detail-clear.png')
                 img.paste(clear_img, (1140 + 400, 320 + index * h + 8, 1140 + 400 + 42, index * h + 50 + 318))

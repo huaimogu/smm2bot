@@ -9,10 +9,14 @@ from .utils import transid
 def get_user_info(mid, proxies):
     url = 'https://tgrcode.com/mm2/user_info/{0}'.format(mid)
     try:
-        r = requests.get(url, proxies=proxies, timeout=500)
-        if r.status_code != 200:
-            return r.json()['error']
-        response = r.json()
+        rq = requests.get('{0}/{1}'.format(url, mid), proxies=proxies)
+        i = 0
+        while i < 1 and (rq.status_code != 200 or rq.text == ''):
+            rq = requests.get(url, proxies=proxies)
+            i = i + 1
+        if rq.status_code != 200:
+            return rq.text
+        response = rq.json()
         im_bg = Image.open('pic/info2.png')
         down_file(response['mii_image'], 'pic/info/{0}-mii.png'.format(mid), proxies)
         im_avatar = Image.open('pic/info/{0}-mii.png'.format(mid)).resize((126, 126), Image.ANTIALIAS)

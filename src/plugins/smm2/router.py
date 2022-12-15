@@ -180,7 +180,7 @@ async def handle_card_command(bot: Bot, matcher: Matcher, db_conn, gid, qid, sen
         at_sender=True)
 
 
-async def handle_info_command(bot, matcher: Matcher, db_conn, qid, ater, args, type):
+async def handle_info_command(bot, matcher: Matcher, db_conn, qid, ater, args, show_type):
     if len(args) > 1:
         await matcher.send('请输入正确的查询命令', at_sender=True)
         return
@@ -194,13 +194,15 @@ async def handle_info_command(bot, matcher: Matcher, db_conn, qid, ater, args, t
             return
     elif len(args) == 1:
         key = args[0]
+        if ater:
+            qid = ater
         mid = get_id(db_conn, qid, key)
         if not mid:
             mid = args[0]
         if len(mid) != 9 and len(mid) != 11:
             await matcher.send('不正确的工匠id', at_sender=True)
             return
-    if type == 1:
+    if show_type == 1:
         error = get_user_info(mid, proxies)
     else:
         error = get_user_info2(mid, proxies)
@@ -242,6 +244,8 @@ async def handle_course_command(bot, matcher: Matcher, db_conn, qid, ater, args,
         mid = get_id(db_conn, qid)
     if len(args) == 1:
         key = args[0]
+        if ater:
+            qid = ater
         mid = get_id(db_conn, qid, key)
         if not mid:
             mid = args[0]
@@ -276,7 +280,8 @@ async def handle_view_command(bot, matcher: Matcher, db_conn, qid, ater, args):
             course_name = line.split('Done parsing ')[1]
     message = MessageSegment.text('图片生成失败')
     if os.path.exists('pic/map/{0}-o.png'.format(courseid)):
-        message = MessageSegment.text('\n{0}\n表世界'.format(course_name)) + MessageSegment.image(
+        #message = MessageSegment.text('\n{0}\n表世界'.format(course_name)) + MessageSegment.image(
+        message = MessageSegment.image(
             pic_data('pic/map/{0}-o.png'.format(courseid)))
     if os.path.exists('pic/map/{0}-s.png'.format(courseid)):
         img = Image.open('pic/map/{0}-s.png'.format(courseid))
@@ -287,7 +292,8 @@ async def handle_view_command(bot, matcher: Matcher, db_conn, qid, ater, args):
                 subprocess.getoutput(
                     'md5sum pic/map/{0}-crop.png'.format(courseid)).split(
                     ' ')[0] == 'f5db35c5867183e6af8db333cfcdc257':
-            message += MessageSegment.text('里世界') + MessageSegment.image(pic_data('pic/map/{0}-s.png'.format(courseid)))
-        else:
-            message += MessageSegment.text('里世界为空')
+            #message += MessageSegment.text('里世界') + MessageSegment.image(pic_data('pic/map/{0}-s.png'.format(courseid)))
+            message += MessageSegment.image(pic_data('pic/map/{0}-s.png'.format(courseid)))
+        #else:
+            #message += MessageSegment.text('里世界为空')
     await matcher.send(message, at_sender=True)

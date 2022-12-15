@@ -14,10 +14,15 @@ def down_file(url, path, proxies=None):
     try:
         r = requests.get(url, stream=True, headers=headers, proxies=proxies)
         code = r.status_code
+        i = 0
+        while code != 200 and i < 1:
+            r = requests.get(url, stream=True, headers=headers, proxies=proxies)
+            code = r.status_code
+            i = i + 1
         if code == 200:
             error = None
         else:
-            error = r.json()['error']
+            error = r.text
         with open(path, 'wb') as fd:
             for chunk in r.iter_content():
                 fd.write(chunk)

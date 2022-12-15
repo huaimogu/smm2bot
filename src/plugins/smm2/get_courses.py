@@ -20,9 +20,13 @@ def get_courses(mid, ctype, is_showmii, is_showthumbnail, proxies):
     elif ctype == 'record':
         url = 'https://tgrcode.com/mm2/get_world_record'
     try:
-        rq = requests.get('{0}/{1}'.format(url, mid), proxies=proxies, timeout=500)
+        rq = requests.get('{0}/{1}'.format(url, mid), proxies=proxies)
+        i = 0
+        while i < 1 and (rq.status_code != 200 or rq.text == ''):
+            rq = requests.get(url, proxies=proxies)
+            i = i + 1
         if rq.status_code != 200:
-            return rq.json()['error']
+            return rq.text
         response = rq.json()
         courses = response['courses']
         if len(courses) == 0:
