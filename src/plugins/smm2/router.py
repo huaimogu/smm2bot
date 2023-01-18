@@ -242,7 +242,7 @@ async def handle_course_command(bot, matcher: Matcher, db_conn, qid, ater, args,
         mid = get_id(db_conn, ater)
     else:
         mid = get_id(db_conn, qid)
-    if len(args) == 1:
+    if len(args) >= 1:
         key = args[0]
         if ater:
             qid = ater
@@ -280,8 +280,8 @@ async def handle_view_command(bot, matcher: Matcher, db_conn, qid, ater, args):
             course_name = line.split('Done parsing ')[1]
     message = MessageSegment.text('图片生成失败')
     if os.path.exists('pic/map/{0}-o.png'.format(courseid)):
-        #message = MessageSegment.text('\n{0}\n表世界'.format(course_name)) + MessageSegment.image(
-        message = MessageSegment.image(
+        #message = MessageSegment.image(
+        message = MessageSegment.text('\n{0}\n表世界'.format(course_name)) + MessageSegment.image(
             pic_data('pic/map/{0}-o.png'.format(courseid)))
     if os.path.exists('pic/map/{0}-s.png'.format(courseid)):
         img = Image.open('pic/map/{0}-s.png'.format(courseid))
@@ -292,8 +292,8 @@ async def handle_view_command(bot, matcher: Matcher, db_conn, qid, ater, args):
                 subprocess.getoutput(
                     'md5sum pic/map/{0}-crop.png'.format(courseid)).split(
                     ' ')[0] == 'f5db35c5867183e6af8db333cfcdc257':
-            #message += MessageSegment.text('里世界') + MessageSegment.image(pic_data('pic/map/{0}-s.png'.format(courseid)))
-            message += MessageSegment.image(pic_data('pic/map/{0}-s.png'.format(courseid)))
-        #else:
-            #message += MessageSegment.text('里世界为空')
+            message += MessageSegment.text('里世界') + MessageSegment.image(pic_data('pic/map/{0}-s.png'.format(courseid)))
+            #message += MessageSegment.image(pic_data('pic/map/{0}-s.png'.format(courseid)))
+        else:
+            message += MessageSegment.text('里世界为空')
     await matcher.send(message, at_sender=True)
