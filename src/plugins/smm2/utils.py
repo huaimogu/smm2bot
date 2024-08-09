@@ -184,27 +184,6 @@ def transcode(mid):
     return mid
 
 
-def cant_query(conn, qid, nickname):
-    ts = int(time.time())
-    interval = 5
-    last_query = conn.get('last_query')
-    if not last_query:
-        conn.set('last_query', ts)
-    last_query = int(last_query)
-    if (ts - last_query) > interval:
-        conn.set('last_query', ts)
-    else:
-        return '蘑菇需要休息休息，请{0}秒后再来查询'.format(interval - ts + last_query)
-    if is_block_user(conn, qid):
-        return '{0}是大师!'.format(nickname)
-    if is_white_user(conn, qid):
-        return False
-    mid = transcode(get_id(conn, qid))
-    if len(mid) != 9:
-        return '先绑定工匠id后再来查询吧'
-    return False
-
-
 def get_command_args(text):
     args = text.strip().split(' ')
     if len(args) == 1 and args[0] == '':
@@ -250,21 +229,27 @@ def draw_text_center_withlines(draw, xy1, xy2, words, font, font_color, hsplit=2
         return
     w = xy2[0] - xy1[0]
     h = xy2[1] - xy1[1]
-    font_w, font_h = font.getsize(words)
+    left, top, right, bottom = font.getbbox(words)
+    font_w = right - left
+    font_h = bottom - left
     lines = math.ceil(font_w / w)
     split_len = math.ceil(len(words) / math.ceil(font_w / w))
     texts = [words[i:i + split_len] for i in range(0, len(words), split_len)]
     h_start = xy1[1] + (h - (lines - 1) * hsplit - lines * font_h) / 2
     index = 0
     for text in texts:
-        w1, h1 = font.getsize(text)
+        left, top, right, bottom = font.getbbox(text)
+        w1 = right - left
+        h1 = bottom - left
         draw.text(xy=(xy1[0] + (w - w1) / 2, h_start), text=text, fill=font_color, font=font)
         h_start += font_h + hsplit
         index += 1
 
 
 def draw_text_right(draw, xy1, words, font, font_color):
-    font_w, font_h = font.getsize(words)
+    left, top, right, bottom = font.getbbox(words)
+    font_w = right - left
+    font_h = bottom - left
     draw.text(xy=(xy1[0] - font_w, xy1[1]), text=words, fill=font_color, font=font)
 
 

@@ -12,8 +12,9 @@ def down_file(url, path, proxies=None):
         'accept-language': 'zh-CN,zh;q=0.9',
     }
     try:
-        r = requests.get(url, stream=True, headers=headers, proxies=proxies)
+        r = requests.get(url, stream=True, headers=headers, proxies=proxies, timeout=5)
         code = r.status_code
+        print('download file: {0} , result code {1}'.format(url, code))
         i = 0
         while code != 200 and i < 1:
             r = requests.get(url, stream=True, headers=headers, proxies=proxies)

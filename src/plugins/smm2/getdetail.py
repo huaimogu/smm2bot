@@ -1,4 +1,6 @@
 import requests
+import time
+import os
 from PIL import Image, ImageDraw, ImageFont
 from .downfile import down_file
 from .utils import draw_text_center_withlines
@@ -9,19 +11,11 @@ def get_course_detail(cid, filter_type, proxies):
     url1 = 'https://tgrcode.com/mm2/level_info/{0}'.format(cid)
     url2 = 'https://tgrcode.com/mm2/level_played/{0}'.format(cid)
     try:
-        rq = requests.get('{0}/{1}'.format(url1, cid), proxies=proxies)
-        i = 0
-        while i < 1 and (rq.status_code != 200 or rq.text == ''):
-            rq = requests.get(url1, proxies=proxies)
-            i = i + 1
+        rq = requests.get(url1, proxies=proxies)
         if rq.status_code != 200:
             return rq.text
         response1 = rq.json()
-        rq = requests.get('{0}/{1}'.format(url2, cid), proxies=proxies)
-        i = 0
-        while i < 1 and (rq.status_code != 200 or rq.text == ''):
-            rq = requests.get(url2, proxies=proxies)
-            i = i + 1
+        rq = requests.get(url2, proxies=proxies)
         if rq.status_code != 200:
             return rq.text
         response2 = rq.json()
@@ -51,40 +45,42 @@ def get_course_detail(cid, filter_type, proxies):
         font3 = ImageFont.truetype('pic/yaheibold.ttf', size=15)
         font_color = (75, 19, 22)
         draw = ImageDraw.Draw(img)
-        down_file('https://tgrcode.com/mm2/level_thumbnail/{0}'.format(cid),
-                      'pic/courses/{0}-thumbnail.png'.format(cid), proxies)
-        thumbnail_img = Image.open('pic/courses/{0}-thumbnail.png'.format(cid)).resize((482, 275), Image.ANTIALIAS)
-        img.paste(thumbnail_img, (56, 130, 538, 405))
-        down_file(response1['uploader']['mii_image'], 'pic/info/{0}-mii.png'.format(response1['uploader']['code']),
-                  proxies)
-        uploader_img = Image.open('pic/info/{0}-mii.png'.format(response1['uploader']['code'])).resize((70, 70),
-                                                                                                       Image.ANTIALIAS)
-        r, g, b, a = uploader_img.split()
-        img.paste(uploader_img, (570, 170, 640, 240), mask=a)
+        if not os.path.exists('pic/courses/{0}-thumbnail.png'.format(cid)):
+            down_file('https://tgrcode.com/mm2/level_thumbnail/{0}'.format(cid), 'pic/courses/{0}-thumbnail.png'.format(cid), proxies)
+        if os.path.exists('pic/courses/{0}-thumbnail.png'.format(cid)):
+            thumbnail_img = Image.open('pic/courses/{0}-thumbnail.png'.format(cid))
+            img.paste(thumbnail_img.resize((482, 275), Image.LANCZOS), (56, 130, 538, 405))
+        if not os.path.exists('pic/info/{0}-mii.png'.format(response1['uploader']['code'])):
+            down_file(response1['uploader']['mii_image'], 'pic/info/{0}-mii.png'.format(response1['uploader']['code']), proxies)
+        if os.path.exists('pic/info/{0}-mii.png'.format(response1['uploader']['code'])):
+            uploader_img = Image.open('pic/info/{0}-mii.png'.format(response1['uploader']['code']))
+            uploader_img = uploader_img.resize((70, 70), Image.LANCZOS)
+            r, g, b, a = uploader_img.split()
+            img.paste(uploader_img, (570, 170, 640, 240), mask=a)
         if 'first_completer' in response1.keys():
-            down_file(response1['first_completer']['mii_image'], 'pic/info/{0}-mii.png'.format(response1['first_completer']['code']),
-                      proxies)
-            first_img = Image.open('pic/info/{0}-mii.png'.format(response1['first_completer']['code'])).resize(
-                (70, 70),
-                Image.ANTIALIAS)
-            r, g, b, a = first_img.split()
-            img.paste(first_img, (90, 900, 160, 970), mask=a)
+            if not os.path.exists('pic/info/{0}-mii.png'.format(response1['first_completer']['code'])):
+                down_file(response1['first_completer']['mii_image'], 'pic/info/{0}-mii.png'.format(response1['first_completer']['code']), proxies)
+            if os.path.exists('pic/info/{0}-mii.png'.format(response1['first_completer']['code'])):
+                first_img = Image.open('pic/info/{0}-mii.png'.format(response1['first_completer']['code']))
+                first_img = first_img.resize((70, 70), Image.LANCZOS)
+                r, g, b, a = first_img.split()
+                img.paste(first_img, (90, 900, 160, 970), mask=a)
             draw.text(xy=(190, 935), text=transid(response1['first_completer']['code']), fill=font_color, font=font)
         if 'record_holder' in response1.keys():
-            down_file(response1['record_holder']['mii_image'],
-                      'pic/info/{0}-mii.png'.format(response1['record_holder']['code']),
-                      proxies)
-            record_img = Image.open('pic/info/{0}-mii.png'.format(response1['record_holder']['code'])).resize(
-                (70, 70), Image.ANTIALIAS)
-            r, g, b, a = record_img.split()
-            img.paste(record_img, (575, 900, 645, 970), mask=a)
+            if not os.path.exists('pic/info/{0}-mii.png'.format(response1['record_holder']['code'])):
+                down_file(response1['record_holder']['mii_image'], 'pic/info/{0}-mii.png'.format(response1['record_holder']['code']), proxies)
+            if os.path.exists('pic/info/{0}-mii.png'.format(response1['record_holder']['code'])):
+                record_img = Image.open('pic/info/{0}-mii.png'.format(response1['record_holder']['code']))
+                record_img = record_img.resize((70, 70), Image.LANCZOS)
+                r, g, b, a = record_img.split()
+                img.paste(record_img, (575, 900, 645, 970), mask=a)
             draw.text(xy=(680, 935), text=transid(response1['record_holder']['code']), fill=font_color, font=font)
         draw.text(xy=(190, 890),
-            text=response1['first_completer']['name'] if 'first_completer' in response1.keys() else '--',
-            fill=font_color, font=font)
+                  text=response1['first_completer']['name'] if 'first_completer' in response1.keys() else '--',
+                  fill=font_color, font=font)
         draw.text(xy=(680, 890), text=
-            response1['record_holder']['name'] if 'record_holder' in response1.keys() else '--', fill=font_color,
-            font=font)
+        response1['record_holder']['name'] if 'record_holder' in response1.keys() else '--', fill=font_color,
+                  font=font)
         draw.text(xy=(115, 25), text=response1['name'], fill=font_color, font=font2)
         draw.text(xy=(680, 150), text=response1['uploader']['name'], fill=font_color, font=font)
         draw.text(xy=(680, 205), text=transid(response1['uploader']['code']), fill=font_color, font=font)
@@ -105,7 +101,8 @@ def get_course_detail(cid, filter_type, proxies):
         draw.text(xy=(600, 535), text='获得点"孬！"数 {0}'.format(response1['boos']), fill=font_color, font=font)
         draw.text(xy=(360, 586), text=str(response1['plays']), fill=font_color, font=font)
         draw.text(xy=(495, 636), text=str(response1['versus_matches']), fill=font_color, font=font)
-        draw.text(xy=(600, 636), text='"多人合作"里获得游玩数 {0}'.format(response1['coop_matches']), fill=font_color, font=font)
+        draw.text(xy=(600, 636), text='"多人合作"里获得游玩数 {0}'.format(response1['coop_matches']), fill=font_color,
+                  font=font)
         if len(response1['tags_name'][0]) > 0:
             draw.text(xy=(150, 685), text=response1['tags_name'][0], fill=font_color, font=font)
         if len(response1['tags_name'][0]) > 1:

@@ -9,7 +9,7 @@ from .utils import transid
 
 
 def get_courses(mid, ctype, is_showmii, is_showthumbnail, proxies):
-    if ctype == 'post':
+    if ctype == 'post' or ctype == 'postall':
         url = 'https://tgrcode.com/mm2/get_posted'
     elif ctype == 'play':
         url = 'https://tgrcode.com/mm2/get_played'
@@ -29,6 +29,8 @@ def get_courses(mid, ctype, is_showmii, is_showthumbnail, proxies):
             return rq.text
         response = rq.json()
         courses = response['courses']
+        if len(courses) > 10 and ctype == 'post':
+            courses = courses[:10]
         if len(courses) == 0:
             return '无符合条件的关卡信息'
         h = 420
@@ -47,7 +49,7 @@ def get_courses(mid, ctype, is_showmii, is_showthumbnail, proxies):
             else:
                 if not os.path.exists('pic/courses/{0}-thumbnail.png'.format(course['course_id'])):
                     down_file('https://tgrcode.com/mm2/level_thumbnail/{0}'.format(course['course_id']), 'pic/courses/{0}-thumbnail.png'.format(course['course_id']), proxies)
-                smm_type_img = Image.open('pic/courses/{0}-thumbnail.png'.format(course['course_id'])).resize((240, 128), Image.ANTIALIAS)
+                smm_type_img = Image.open('pic/courses/{0}-thumbnail.png'.format(course['course_id'])).resize((240, 128), Image.LANCZOS)
             img.paste(card_img, (0, index * h, w, (index + 1) * 420))
             img.paste(smm_type_img, (20, index * h + 40, 260, index * h + 168))
             draw.text(xy=(280, index * h + 40), text=str(course['name']), fill=font_color, font=font3)
@@ -82,10 +84,14 @@ def get_courses(mid, ctype, is_showmii, is_showthumbnail, proxies):
                       text=course['record_holder']['name'] if 'record_holder' in course.keys() else '--',
                       fill=font_color,
                       font=font2)
-            w3, h3 = font.getsize('{0}/{1}'.format(course['clears'], course['attempts']))
+            a,b,c,d = font.getbbox('{0}/{1}'.format(course['clears'], course['attempts']))
+            w3 = c - a
+            h3 = d - b
             draw.text(xy=(354 + (292 - w3) / 2, index * h + 350),
                       text='{0}/{1}'.format(course['clears'], course['attempts']), fill=font_color, font=font)
-            w4, h4 = font.getsize(transid(course['course_id']))
+            a,b,c,d = font.getbbox(transid(course['course_id']))
+            w4 = c - a
+            h4 = d - b
             draw.text(xy=(684+(292-w4)/2, index * h + 350), text=transid(course['course_id']), fill=font_color, font=font)
             if is_showmii and 'record_holder' in course.keys():
                 if not os.path.exists('pic/info/{0}-mii.png'.format(course['record_holder']['code'])):
@@ -95,7 +101,7 @@ def get_courses(mid, ctype, is_showmii, is_showthumbnail, proxies):
                     except Exception as e:
                         return 'mii下载失败，请重试'
                 im_avatar = Image.open('pic/info/{0}-mii.png'.format(course['record_holder']['code'])).resize((70, 70),
-                                                                                                              Image.ANTIALIAS)
+                                                                                                              Image.LANCZOS)
                 r, g, b, a = im_avatar.split()
                 img.paste(im_avatar, (40, index * h + 315, 110, index * h + 385), mask=a)
         if len(courses) > 70:

@@ -1,4 +1,5 @@
 import requests
+import os
 from PIL import Image, ImageDraw, ImageFont
 from .utils import draw_text_center_withlines
 from .utils import transid
@@ -17,10 +18,13 @@ def get_user_info(mid, proxies):
             return rq.text
         response = rq.json()
         im_bg = Image.open('pic/info.png')
-        down_file(response['mii_image'], 'pic/info/{0}-mii.png'.format(mid), proxies)
-        im_avatar = Image.open('pic/info/{0}-mii.png'.format(mid)).resize((400, 400), Image.ANTIALIAS)
-        r, g, b, a = im_avatar.split()
-        im_bg.paste(im_avatar, (20, 10, 420, 410), mask=a)
+        if not os.path.exists('pic/info/{0}-mii.png'.format(mid)):
+            down_file(response['mii_image'], 'pic/info/{0}-mii.png'.format(mid))
+        if os.path.exists('pic/info/{0}-mii.png'.format(mid)):
+            im_avatar = Image.open('pic/info/{0}-mii.png'.format(mid))
+            im_avatar = im_avatar.resize((400, 400), Image.LANCZOS)
+            r, g, b, a = im_avatar.split()
+            im_bg.paste(im_avatar, (20, 10, 420, 410), mask=a)
         font = ImageFont.truetype('pic/yaheibold.ttf', size=32)
         font_color = (0, 0, 0)
         draw = ImageDraw.Draw(im_bg)

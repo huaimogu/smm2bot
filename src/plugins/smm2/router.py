@@ -19,7 +19,7 @@ from .get_courses import get_courses
 from .downfile import down_file
 from nonebot import get_driver
 from nonebot.matcher import Matcher
-from nonebot.adapters.onebot.v11 import Bot, MessageSegment
+from nonebot.adapters.qq import Bot, MessageSegment
 
 if 'proxy' in get_driver().config:
     proxy = get_driver().config.proxy
@@ -164,7 +164,7 @@ async def handle_card_command(bot: Bot, matcher: Matcher, db_conn, gid, qid, sen
         card_user = ater
     else:
         nickname = sender_nickname
-        avatar = 'http://q1.qlogo.cn/g?b=qq&nk={0}&s=640'.format(qid)
+        avatar = None
         sw = get_sw(db_conn, qid, key)
         mid = get_id(db_conn, qid, key)
         card_user = qid
@@ -176,7 +176,7 @@ async def handle_card_command(bot: Bot, matcher: Matcher, db_conn, gid, qid, sen
         mid = '未绑定'
     get_card(avatar, role, nickname, card_user, sw, mid)
     await matcher.send(
-        MessageSegment.image(pic_data('pic/card/{0}-card.png'.format(card_user))),
+        MessageSegment.file_image(data=pic_data('pic/card/{0}-card.png'.format(card_user))),
         at_sender=True)
 
 
@@ -208,7 +208,7 @@ async def handle_info_command(bot, matcher: Matcher, db_conn, qid, ater, args, s
         error = get_user_info2(mid, proxies)
     if not error:
         await matcher.send(
-            MessageSegment.image(pic_data('pic/info/{0}.png'.format(mid))),
+            MessageSegment.file_image(data=pic_data('pic/info/{0}.png'.format(mid))),
             at_sender=True)
     else:
         await matcher.send(error, at_sender=True)
@@ -225,7 +225,7 @@ async def handle_detail_command(bot, matcher: Matcher, db_conn, qid, ater, args)
     error = get_course_detail(courseid, filter_type, proxies)
     if not error:
         await matcher.send(
-            MessageSegment.image(pic_data('pic/detail/{0}.png'.format(courseid))),
+            MessageSegment.file_image(data=pic_data('pic/detail/{0}.png'.format(courseid))),
             at_sender=True)
     else:
         await matcher.send(error, at_sender=True)
@@ -258,7 +258,7 @@ async def handle_course_command(bot, matcher: Matcher, db_conn, qid, ater, args,
         error = get_courses(mid, ctype, is_showmii, is_showthumbnail, proxies)
         if not error:
             await matcher.send(
-                MessageSegment.image(pic_data('pic/courses/{0}-{1}.png'.format(mid, ctype))),
+                MessageSegment.file_image(data=pic_data('pic/courses/{0}-{1}.png'.format(mid, ctype))),
                 at_sender=True)
         else:
             await matcher.send(error, at_sender=True)
@@ -280,8 +280,8 @@ async def handle_view_command(bot, matcher: Matcher, db_conn, qid, ater, args):
             course_name = line.split('Done parsing ')[1]
     message = MessageSegment.text('图片生成失败')
     if os.path.exists('pic/map/{0}-o.png'.format(courseid)):
-        #message = MessageSegment.image(
-        message = MessageSegment.text('\n{0}\n表世界'.format(course_name)) + MessageSegment.image(
+        #message = MessageSegment.file_image(data=
+        message = MessageSegment.text('\n{0}\n表世界'.format(course_name)) + MessageSegment.file_image(data=
             pic_data('pic/map/{0}-o.png'.format(courseid)))
     if os.path.exists('pic/map/{0}-s.png'.format(courseid)):
         img = Image.open('pic/map/{0}-s.png'.format(courseid))
@@ -291,9 +291,9 @@ async def handle_view_command(bot, matcher: Matcher, db_conn, qid, ater, args):
         if not \
                 subprocess.getoutput(
                     'md5sum pic/map/{0}-crop.png'.format(courseid)).split(
-                    ' ')[0] == 'f5db35c5867183e6af8db333cfcdc257':
-            message += MessageSegment.text('里世界') + MessageSegment.image(pic_data('pic/map/{0}-s.png'.format(courseid)))
-            #message += MessageSegment.image(pic_data('pic/map/{0}-s.png'.format(courseid)))
+                    ' ')[0] == '3dbab083827883b9b00fdbac97bd8be2':
+            message += MessageSegment.text('里世界') + MessageSegment.file_image(data=pic_data('pic/map/{0}-s.png'.format(courseid)))
+            #message += MessageSegment.file_image(data=pic_data('pic/map/{0}-s.png'.format(courseid)))
         else:
             message += MessageSegment.text('里世界为空')
     await matcher.send(message, at_sender=True)
