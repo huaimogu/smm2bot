@@ -257,9 +257,7 @@ async def handle_course_command(bot, matcher: Matcher, db_conn, qid, ater, args,
     else:
         error = get_courses(mid, ctype, is_showmii, is_showthumbnail, proxies)
         if not error:
-            await matcher.send(
-                MessageSegment.file_image(data=pic_data('pic/courses/{0}-{1}.png'.format(mid, ctype))),
-                at_sender=True)
+            await matcher.send(MessageSegment.file_image(data=pic_data('pic/courses/{0}-{1}.png'.format(mid, ctype))), at_sender=True)
         else:
             await matcher.send(error, at_sender=True)
 

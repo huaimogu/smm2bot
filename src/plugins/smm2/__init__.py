@@ -1,6 +1,7 @@
 from nonebot import on_command
 from nonebot.adapters.qq import (
     Message,
+    MessageSegment,
     MessageEvent, Bot,
 )
 from nonebot.params import CommandArg
@@ -12,6 +13,7 @@ from .utils import unblock_user
 from .utils import white_user
 from .utils import unwhite_user
 from .utils import is_block_user
+from .utils import pic_data
 from .router import handle_sw_command
 from .router import handle_id_command
 from .router import handle_bind_command
@@ -166,5 +168,5 @@ async def _(bot: Bot, event: MessageEvent, foo: Message = CommandArg()):
 
 @help_matcher.handle()
 async def _():
-    await help_matcher.send('【金山文档】 bot帮助文档https://kdocs.cn/l/saSleN4dPYUj', at_sender=True)
+    await help_matcher.send(MessageSegment.file_image(data=pic_data('pic/help.png')), at_sender=True)
 

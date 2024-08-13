@@ -104,9 +104,9 @@ def get_courses(mid, ctype, is_showmii, is_showthumbnail, proxies):
                                                                                                               Image.LANCZOS)
                 r, g, b, a = im_avatar.split()
                 img.paste(im_avatar, (40, index * h + 315, 110, index * h + 385), mask=a)
-        if len(courses) > 70:
-            img = img.resize(
-                (int(w * 0.7 * 100 / len(courses)), int((h * len(courses) + 20) * 0.7 * 100 / len(courses))))
+        if len(courses) > 20:
+            rate = 15 / len(courses)
+            img = img.resize((int(w * rate), int((h * len(courses) + 20) * rate)))
         img.save('pic/courses/{0}-{1}.png'.format(mid, ctype))
         return None
     except Exception as e:
